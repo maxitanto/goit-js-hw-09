@@ -8,40 +8,45 @@ const remainingHours = document.querySelector('[data-hours]');
 const remainingMinutes = document.querySelector('[data-minutes]');
 const remainingSeconds = document.querySelector('[data-seconds]');
 
+let intervalID = null;
+let selectedDateMs = 0;
 btnStart.disabled = true;
 
-flatpickr(datetimePicker, {
+const options = {
   enableTime: true,
   time_24hr: true,
   defaultDate: new Date(),
   minuteIncrement: 1,
 
   onClose(selectedDates) {
-    const convertedSelectedDates = selectedDates[0].getTime();
+    selectedDateMs = selectedDates[0].getTime();
 
-    if (convertedSelectedDates < Date.now()) {
+    if (selectedDateMs < Date.now()) {
       window.alert('Please choose a date in the future');
       return;
     }
 
     btnStart.disabled = false;
 
-    btnStart.addEventListener('click', onClick);
-
-    function onClick() {
-      setIntervalID = setInterval(() => {
-        const remainingTimes = convertedSelectedDates - Date.now();
-        let time = convertMs(addLeadingZero(remainingTimes));
-
-        updateClockface(time);
-
-        if (remainingTimes < 1000) {
-          clearInterval(setIntervalID);
-        }
-      }, 1000);
-    }
+    btnStart.addEventListener('click', onBtnStartClick);
   },
-});
+};
+
+flatpickr(datetimePicker, options);
+
+function onBtnStartClick() {
+  intervalID = setInterval(() => {
+    const remainingTimes = selectedDateMs - Date.now();
+    let time = convertMs(addLeadingZero(remainingTimes));
+
+    updateClockface(time);
+
+    if (remainingTimes < 1000) {
+      clearInterval(intervalID);
+      return;
+    }
+  }, 1000);
+}
 
 function updateClockface({ days, hours, minutes, seconds }) {
   remainingDays.textContent = `${days}`;
@@ -74,3 +79,30 @@ function convertMs(ms) {
 function addLeadingZero(value) {
   return String(value).padStart(2, '0');
 }
+
+// GPT
+// function convertMs(ms) {
+//   // Number of milliseconds per unit of time
+//   const second = 1000;
+//   const minute = second * 60;
+//   const hour = minute * 60;
+//   const day = hour * 24;
+
+//   if (ms < 0) {
+//     // If remaining time is negative, set all values to 0
+//     return { days: '00', hours: '00', minutes: '00', seconds: '00' };
+//   }
+
+//   // Remaining days
+//   const days = addLeadingZero(Math.floor(ms / day));
+//   // Remaining hours
+//   const hours = addLeadingZero(Math.floor((ms % day) / hour));
+//   // Remaining minutes
+//   const minutes = addLeadingZero(Math.floor(((ms % day) % hour) / minute));
+//   // Remaining seconds
+//   const seconds = addLeadingZero(
+//     Math.floor((((ms % day) % hour) % minute) / second)
+//   );
+
+//   return { days, hours, minutes, seconds };
+// }
