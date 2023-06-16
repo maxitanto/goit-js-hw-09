@@ -47,6 +47,7 @@ function onBtnStartClick() {
       return;
     }
   }, 1000);
+  btnStart.disabled = true;
 }
 
 function updateClockface({ days, hours, minutes, seconds }) {
